@@ -1,0 +1,148 @@
+:root{
+  --felt-1:#0f5138;
+  --felt-2:#07301f;
+  --gold:#f2c14e;
+  --card-bg:#fffdf7;
+  --red:#c62828;
+  --black:#20242b;
+  --shadow:0 6px 14px rgba(0,0,0,.35);
+  --radius:10px;
+  --card-w: min(21vw, 17vh, 100px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;margin:0;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+  background:radial-gradient(ellipse at 50% 30%,var(--felt-1),var(--felt-2));
+  color:#fff;
+  overflow:hidden;
+  touch-action:manipulation;
+  user-select:none;-webkit-user-select:none;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* ---------- 画面切替 ---------- */
+.screen{display:none;height:100%;flex-direction:column;}
+.screen.active{display:flex;}
+
+/* ---------- タイトル ---------- */
+.title-inner{
+  margin:auto;padding:24px;width:100%;max-width:420px;text-align:center;
+}
+.logo{
+  font-size:clamp(40px,13vw,64px);margin:0;letter-spacing:.12em;
+  color:var(--gold);text-shadow:0 3px 0 #00000055;
+}
+.logo-sub{margin:4px 0 28px;opacity:.75;font-size:13px;letter-spacing:.14em;}
+.diff-group{display:flex;flex-direction:column;gap:10px;margin-bottom:26px;}
+.diff-btn{
+  appearance:none;border:2px solid rgba(255,255,255,.22);background:rgba(255,255,255,.06);
+  color:#fff;border-radius:14px;padding:13px 14px;text-align:left;cursor:pointer;
+  display:flex;flex-direction:column;gap:3px;transition:.15s;
+}
+.diff-btn.selected{border-color:var(--gold);background:rgba(242,193,78,.16);}
+.diff-name{font-size:17px;font-weight:700;}
+.diff-desc{font-size:12px;opacity:.72;}
+.primary-btn{
+  appearance:none;border:none;width:100%;padding:15px;border-radius:14px;cursor:pointer;
+  background:linear-gradient(180deg,#f7d072,#e0a92b);color:#3a2a00;
+  font-size:18px;font-weight:800;letter-spacing:.05em;box-shadow:var(--shadow);
+}
+.primary-btn:active{transform:translateY(1px);}
+.ghost-btn{
+  appearance:none;border:none;background:none;color:#fff;opacity:.7;
+  margin-top:12px;padding:10px;font-size:14px;width:100%;cursor:pointer;text-decoration:underline;
+}
+
+/* ---------- HUD ---------- */
+.hud{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 10px;flex:0 0 auto;
+}
+.hud-btn{
+  width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.25);
+  background:rgba(0,0,0,.2);color:#fff;font-size:15px;cursor:pointer;line-height:1;
+}
+.hud-center{display:flex;gap:10px;align-items:baseline;}
+.hud-diff{font-size:12px;opacity:.7;}
+.hud-time{font-size:15px;font-variant-numeric:tabular-nums;color:var(--gold);font-weight:700;}
+
+/* ---------- 盤面 ---------- */
+.board{
+  flex:1 1 auto;display:flex;flex-direction:column;justify-content:space-between;
+  padding:2px 8px 10px;min-height:0;
+}
+.side{display:flex;flex-direction:column;gap:4px;}
+.side-label{display:flex;justify-content:space-between;align-items:center;padding:0 4px;font-size:12px;opacity:.8;}
+.side-label .who{font-weight:700;letter-spacing:.08em;}
+.side-label .stock{font-variant-numeric:tabular-nums;}
+.hand{display:grid;grid-template-columns:repeat(4,var(--card-w));gap:6px;justify-content:center;}
+
+.center{
+  display:flex;align-items:center;justify-content:center;gap:min(6vw,34px);
+  position:relative;padding:6px 0;
+}
+.pile-wrap{position:relative;}
+.center-msg{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  font-size:13px;font-weight:700;color:var(--gold);text-align:center;
+  text-shadow:0 2px 6px #000;pointer-events:none;white-space:nowrap;
+}
+
+/* ---------- カード ---------- */
+.card{
+  position:relative;width:100%;aspect-ratio:5/7;border-radius:var(--radius);
+  background:var(--card-bg);box-shadow:var(--shadow);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  cursor:pointer;transition:transform .12s,box-shadow .12s;
+}
+.card .rank{font-size:calc(var(--card-w)*.44);font-weight:800;line-height:1;}
+.card .suit{font-size:calc(var(--card-w)*.26);line-height:1;margin-top:2px;}
+.card.red{color:var(--red);}
+.card.black{color:var(--black);}
+.card .corner{
+  position:absolute;top:3px;left:5px;font-size:calc(var(--card-w)*.17);font-weight:700;line-height:1.05;text-align:center;
+}
+.card.empty{background:rgba(255,255,255,.07);box-shadow:none;border:2px dashed rgba(255,255,255,.2);cursor:default;}
+.card.selected{transform:translateY(-10px) scale(1.04);box-shadow:0 10px 20px rgba(0,0,0,.5),0 0 0 3px var(--gold);}
+.card.hint{box-shadow:var(--shadow),0 0 0 3px #7ee0a1;}
+.card.pop{animation:pop .18s ease-out;}
+@keyframes pop{from{transform:scale(.82) rotate(-4deg);}to{transform:scale(1) rotate(0);}}
+.card.shake{animation:shake .22s;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+
+.pile{width:calc(var(--card-w)*1.15);}
+.pile .card{width:100%;}
+.pile-count{
+  position:absolute;right:-6px;bottom:-6px;background:#000a;color:#fff;font-size:11px;
+  border-radius:10px;padding:1px 7px;font-variant-numeric:tabular-nums;
+}
+.pile.target{outline:3px solid var(--gold);outline-offset:3px;border-radius:var(--radius);}
+
+.cpu .hand .card{opacity:.95;}
+
+/* ---------- オーバーレイ ---------- */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);
+  display:none;align-items:center;justify-content:center;padding:20px;z-index:20;
+}
+.overlay.show{display:flex;}
+.dialog{
+  background:#12261f;border:1px solid rgba(255,255,255,.15);border-radius:18px;
+  padding:24px;width:100%;max-width:380px;text-align:center;box-shadow:var(--shadow);
+}
+.dialog h2{margin:0 0 8px;font-size:30px;color:var(--gold);letter-spacing:.06em;}
+.dialog p{margin:0 0 18px;font-size:14px;opacity:.85;line-height:1.6;}
+.dialog.rules{text-align:left;max-height:82vh;overflow:auto;}
+.dialog.rules h2{font-size:20px;text-align:center;}
+.dialog.rules h3{font-size:15px;margin:16px 0 6px;color:var(--gold);}
+.dialog.rules ol{padding-left:1.2em;margin:0;}
+.dialog.rules li{font-size:13.5px;line-height:1.75;margin-bottom:6px;}
+.dialog.rules p{font-size:13.5px;line-height:1.7;}
+
+/* ---------- 横向き・大画面 ---------- */
+@media (orientation:landscape) and (max-height:520px){
+  .board{padding-bottom:2px;}
+  .center{padding:0;}
+  .hud{padding:2px 10px;}
+}

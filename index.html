@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b3d2c">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>スピード</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===== タイトル画面 ===== -->
+<section id="titleScreen" class="screen active">
+  <div class="title-inner">
+    <h1 class="logo">スピード</h1>
+    <p class="logo-sub">SPEED / 2人対戦トランプ</p>
+
+    <div class="diff-group" role="radiogroup" aria-label="難易度">
+      <button class="diff-btn" data-diff="easy" role="radio" aria-checked="false">
+        <span class="diff-name">やさしい</span>
+        <span class="diff-desc">CPUはゆっくり・出せる札を光らせる</span>
+      </button>
+      <button class="diff-btn selected" data-diff="normal" role="radio" aria-checked="true">
+        <span class="diff-name">ふつう</span>
+        <span class="diff-desc">CPUは人間くらいの速さ</span>
+      </button>
+      <button class="diff-btn" data-diff="hard" role="radio" aria-checked="false">
+        <span class="diff-name">むずかしい</span>
+        <span class="diff-desc">CPUは高速・ミスなし</span>
+      </button>
+    </div>
+
+    <button id="startBtn" class="primary-btn">ゲーム開始</button>
+    <button id="rulesBtn" class="ghost-btn">あそびかた</button>
+  </div>
+</section>
+
+<!-- ===== ゲーム画面 ===== -->
+<section id="gameScreen" class="screen">
+  <header class="hud">
+    <button id="backBtn" class="hud-btn" aria-label="やめる">✕</button>
+    <div class="hud-center">
+      <span id="hudDiff" class="hud-diff">ふつう</span>
+      <span id="hudTime" class="hud-time">0.0秒</span>
+    </div>
+    <button id="helpBtn" class="hud-btn" aria-label="あそびかた">?</button>
+  </header>
+
+  <div class="board">
+    <!-- CPU -->
+    <div class="side cpu">
+      <div class="side-label">
+        <span class="who">CPU</span>
+        <span class="stock" id="cpuStock">残り 22</span>
+      </div>
+      <div class="hand" id="cpuHand"></div>
+    </div>
+
+    <!-- 場 -->
+    <div class="center">
+      <div class="pile-wrap">
+        <div class="pile" id="pile0" data-pile="0"></div>
+      </div>
+      <div class="center-msg" id="centerMsg"></div>
+      <div class="pile-wrap">
+        <div class="pile" id="pile1" data-pile="1"></div>
+      </div>
+    </div>
+
+    <!-- プレイヤー -->
+    <div class="side me">
+      <div class="hand" id="myHand"></div>
+      <div class="side-label">
+        <span class="who">あなた</span>
+        <span class="stock" id="myStock">残り 22</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 結果 ===== -->
+<div id="resultOverlay" class="overlay">
+  <div class="dialog">
+    <h2 id="resultTitle">WIN!</h2>
+    <p id="resultText"></p>
+    <button id="retryBtn" class="primary-btn">もう一回</button>
+    <button id="toTitleBtn" class="ghost-btn">タイトルへ</button>
+  </div>
+</div>
+
+<!-- ===== ルール ===== -->
+<div id="rulesOverlay" class="overlay">
+  <div class="dialog rules">
+    <h2>あそびかた（公式ルール）</h2>
+    <ol>
+      <li>52枚を色で二分し、<b>あなたは赤（♥♦）26枚</b>、CPUは黒（♠♣）26枚を使います。</li>
+      <li>手札は4枚。場（台札）は左右に2つ。</li>
+      <li>台札の一番上と<b>数字が1つ違い</b>の手札を出せます。<b>A と K はつながります</b>（…Q-K-A-2-3…）。</li>
+      <li>出したらすぐ山札から手札を4枚に補充。<b>順番はなく、早い者勝ち</b>です。</li>
+      <li>お互い出せる札がなくなったら、両者が山札から1枚ずつ台札に出して再開します。</li>
+      <li>手札と山札を<b>先に全部なくした方の勝ち</b>。</li>
+    </ol>
+    <h3>操作</h3>
+    <p>手札をタップ → 出したい台札をタップ。<br>台札をタップするだけでも、出せる手札が1枚だけなら自動で出します。</p>
+    <button id="closeRulesBtn" class="primary-btn">とじる</button>
+  </div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
