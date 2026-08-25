@@ -21,7 +21,7 @@
     <div class="diff-group" role="radiogroup" aria-label="難易度">
       <button class="diff-btn" data-diff="easy" role="radio" aria-checked="false">
         <span class="diff-name">やさしい</span>
-        <span class="diff-desc">CPUはゆっくり・出せる札を光らせる</span>
+        <span class="diff-desc">CPUはゆっくり・見落としも多い</span>
       </button>
       <button class="diff-btn selected" data-diff="normal" role="radio" aria-checked="true">
         <span class="diff-name">ふつう</span>
@@ -31,6 +31,14 @@
         <span class="diff-name">むずかしい</span>
         <span class="diff-desc">CPUは高速・ミスなし</span>
       </button>
+    </div>
+
+    <div class="opt-row">
+      <span class="opt-label">補助（出せる札を光らせる）</span>
+      <div class="seg" role="radiogroup" aria-label="補助">
+        <button class="seg-btn selected" data-hint="off" role="radio" aria-checked="true">なし</button>
+        <button class="seg-btn" data-hint="on" role="radio" aria-checked="false">あり</button>
+      </div>
     </div>
 
     <button id="startBtn" class="primary-btn">ゲーム開始</button>
@@ -104,7 +112,8 @@
       <li>手札と山札を<b>先に全部なくした方の勝ち</b>。</li>
     </ol>
     <h3>操作</h3>
-    <p>手札をタップ → 出したい台札をタップ。<br>台札をタップするだけでも、出せる手札が1枚だけなら自動で出します。</p>
+    <p>手札をタップして選び、<b>出したい台札（左か右）をタップ</b>して出します。<br>
+    台札を先にタップすると、そこに出せる手札を自動で出します。</p>
     <button id="closeRulesBtn" class="primary-btn">とじる</button>
   </div>
 </div>

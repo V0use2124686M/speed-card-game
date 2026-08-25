@@ -6,10 +6,12 @@ const RANK_LABEL = { 1:'A', 11:'J', 12:'Q', 13:'K' };
 const SUITS = { red:['♥','♦'], black:['♠','♣'] };
 
 const DIFF = {
-  easy:   { label:'やさしい',   min:1000, max:1700, miss:0.40, hint:true,  smart:false },
-  normal: { label:'ふつう',     min:520,  max:900,  miss:0.15, hint:false, smart:false },
-  hard:   { label:'むずかしい', min:230,  max:400,  miss:0.02, hint:false, smart:true  },
+  easy:   { label:'やさしい',   min:1000, max:1700, miss:0.40, smart:false },
+  normal: { label:'ふつう',     min:520,  max:900,  miss:0.15, smart:false },
+  hard:   { label:'むずかしい', min:230,  max:400,  miss:0.02, smart:true  },
 };
+
+const STUCK_WAIT = 5000;   // 出せる札がなくなってから場に出すまでの溜め
 
 const $ = sel => document.querySelector(sel);
 const el = {
@@ -24,6 +26,7 @@ const el = {
 
 /* ========== 状態 ========== */
 let diffKey = 'normal';
+let hintOn = false;
 let S = null;
 let cpuTimer = null, stuckTimer = null, tickTimer = null;
 
@@ -212,7 +215,7 @@ function checkStuck(){
     if (!S || !S.running) return;
     scheduleCpu(DIFF[diffKey].min);
     stuckTimer = setInterval(checkStuck, 220);
-  }, 850);
+  }, STUCK_WAIT);
 }
 
 function flash(msg){
@@ -231,7 +234,7 @@ function cardHTML(card, cls){
 
 function render(){
   if (!S) return;
-  const hint = DIFF[diffKey].hint;
+  const hint = hintOn;
 
   el.cpuHand.innerHTML = S.p.cpu.hand.map(c => cardHTML(c)).join('');
   el.myHand.innerHTML = S.p.me.hand.map((c, i) => {
@@ -275,12 +278,9 @@ el.myHand.addEventListener('click', e => {
   const card = S.p.me.hand[i];
   if (!card) return;
 
-  if (S.selected === i){ S.selected = null; render(); return; }
-
-  const ok = [0,1].filter(p => canPlace(card, S.center[p]));
-  if (ok.length === 0){ S.selected = null; render(); shakeSlot(i); return; }
-  if (ok.length === 1){ play('me', i, ok[0]); return; }   // 出せる場所が1つなら即出し
-  S.selected = i; render();                               // 2つあるなら台札を選ばせる
+  // 左右どちらに出すかは必ずプレイヤーが選ぶ（選択 → 台札をタップ）
+  S.selected = (S.selected === i) ? null : i;
+  render();
 });
 
 [el.pile0, el.pile1].forEach(node => node.addEventListener('click', () => {
@@ -302,6 +302,15 @@ document.querySelectorAll('.diff-btn').forEach(btn => btn.addEventListener('clic
     b.setAttribute('aria-checked', String(on));
   });
   diffKey = btn.dataset.diff;
+}));
+
+document.querySelectorAll('.seg-btn').forEach(btn => btn.addEventListener('click', () => {
+  document.querySelectorAll('.seg-btn').forEach(b => {
+    const on = b === btn;
+    b.classList.toggle('selected', on);
+    b.setAttribute('aria-checked', String(on));
+  });
+  hintOn = btn.dataset.hint === 'on';
 }));
 
 function show(screen){

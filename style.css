@@ -43,6 +43,18 @@ body{
 .diff-btn.selected{border-color:var(--gold);background:rgba(242,193,78,.16);}
 .diff-name{font-size:17px;font-weight:700;}
 .diff-desc{font-size:12px;opacity:.72;}
+.opt-row{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin:-12px 0 24px;padding:0 2px;
+}
+.opt-label{font-size:13px;opacity:.75;}
+.seg{display:flex;border:1px solid rgba(255,255,255,.25);border-radius:10px;overflow:hidden;flex:0 0 auto;}
+.seg-btn{
+  appearance:none;border:none;background:transparent;color:#fff;
+  padding:8px 16px;font-size:14px;cursor:pointer;opacity:.6;
+}
+.seg-btn.selected{background:var(--gold);color:#3a2a00;font-weight:700;opacity:1;}
+
 .primary-btn{
   appearance:none;border:none;width:100%;padding:15px;border-radius:14px;cursor:pointer;
   background:linear-gradient(180deg,#f7d072,#e0a92b);color:#3a2a00;
