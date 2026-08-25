@@ -28,7 +28,7 @@ const el = {
 let diffKey = 'normal';
 let hintOn = false;
 let S = null;
-let cpuTimer = null, stuckTimer = null, tickTimer = null;
+let cpuTimer = null, stuckTimer = null, tickTimer = null, countTimer = null;
 
 const label = r => RANK_LABEL[r] || String(r);
 const shuffle = a => { for (let i=a.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [a[i],a[j]]=[a[j],a[i]]; } return a; };
@@ -158,8 +158,8 @@ function finish(winner){
 }
 
 function clearTimers(){
-  clearTimeout(cpuTimer); clearInterval(stuckTimer); clearInterval(tickTimer);
-  cpuTimer = stuckTimer = tickTimer = null;
+  clearTimeout(cpuTimer); clearInterval(stuckTimer); clearInterval(tickTimer); clearInterval(countTimer);
+  cpuTimer = stuckTimer = tickTimer = countTimer = null;
 }
 
 /* ========== CPU ========== */
@@ -207,15 +207,20 @@ function checkStuck(){
   if (movesOf('me').length || movesOf('cpu').length) return;
   clearInterval(stuckTimer); stuckTimer = null;
   clearTimeout(cpuTimer);
-  el.centerMsg.textContent = 'せーの！';
-  setTimeout(() => {
-    if (!S || !S.running) return;
+
+  let left = Math.round(STUCK_WAIT / 1000);
+  const show = () => { el.centerMsg.innerHTML = `せーの！<span class="count">${left}</span>`; };
+  show();
+  countTimer = setInterval(() => {
+    if (!S || !S.running){ clearInterval(countTimer); countTimer = null; return; }
+    if (--left > 0){ show(); return; }
+    clearInterval(countTimer); countTimer = null;
     el.centerMsg.textContent = '';
     flipCenter();
     if (!S || !S.running) return;
     scheduleCpu(DIFF[diffKey].min);
     stuckTimer = setInterval(checkStuck, 220);
-  }, STUCK_WAIT);
+  }, 1000);
 }
 
 function flash(msg){
