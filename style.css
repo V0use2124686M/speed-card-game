@@ -44,6 +44,7 @@ body{
 .diff-btn.selected{border-color:var(--gold);background:rgba(242,193,78,.16);}
 .diff-name{font-size:17px;font-weight:700;}
 .diff-desc{font-size:12px;opacity:.72;}
+.best-line{font-size:12px;opacity:.7;margin:-8px 0 14px;min-height:1.2em;}
 .opt-row{
   display:flex;align-items:center;justify-content:space-between;gap:10px;
   margin:0 0 12px;padding:0 2px;
@@ -145,7 +146,8 @@ body{
 /* ---------- 結果画面 ---------- */
 .result-inner{margin:auto;padding:24px;width:100%;max-width:380px;text-align:center;}
 #resultTitle{margin:0 0 10px;font-size:clamp(44px,15vw,72px);letter-spacing:.06em;text-shadow:0 3px 0 #00000055;}
-#resultText{margin:0 0 30px;font-size:15px;opacity:.85;line-height:1.7;}
+#resultText{margin:0 0 14px;font-size:15px;opacity:.85;line-height:1.7;}
+#resultRecord{margin:0 0 28px;font-size:15px;font-weight:700;color:var(--gold);line-height:1.6;min-height:1.2em;}
 
 /* ---------- オーバーレイ ---------- */
 .overlay{
