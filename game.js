@@ -134,7 +134,7 @@ function startGame(){
     recycles: 0,
   };
   el.hudDiff.textContent = DIFF[diffKey].label;
-  el.hudTime.textContent = '0.0びょう';
+  el.hudTime.textContent = '0.0秒';
   el.centerMsg.textContent = 'せーの！';
   render();
 
@@ -242,17 +242,17 @@ function finish(winner){
   updateRecords();
 
   const win = winner === 'me';
-  el.resultTitle.textContent = winner === 'draw' ? 'ひきわけ' : win ? 'かち！' : 'まけ…';
+  el.resultTitle.textContent = winner === 'draw' ? '引き分け' : win ? '勝ち！' : '負け…';
   el.resultTitle.style.color = winner === 'draw' ? '#cfd8dc' : win ? '#f2c14e' : '#ef9a9a';
   el.resultText.innerHTML = winner === 'draw'
-    ? `けっちゃく つかず。<br>${sec}びょう`
-    : `${DIFF[diffKey].label}　${sec}びょう<br>` +
-      (win ? `あいての のこり ${remaining('cpu')}まい` : `あなたの のこり ${remaining('me')}まい`);
+    ? `決着 つかず。<br>${sec}秒`
+    : `${DIFF[diffKey].label}　${sec}秒<br>` +
+      (win ? `相手の のこり ${remaining('cpu')}まい` : `あなたの のこり ${remaining('me')}まい`);
 
   const lines = [];
-  if (newBest) lines.push('🎉 じこ さいこうきろく！');
-  else if (rec.best !== null) lines.push(`さいこうきろく ${rec.best}びょう`);
-  if (rec.streak >= 2) lines.push(`${rec.streak}れんしょう ちゅう`);
+  if (newBest) lines.push('🎉 いままでで 一番 速い！');
+  else if (rec.best !== null) lines.push(`ベスト ${rec.best}秒`);
+  if (rec.streak >= 2) lines.push(`${rec.streak}回 つづけて 勝ち`);
   el.resultRecord.innerHTML = lines.join('<br>');
 
   (win ? SFX.win : SFX.lose)();
@@ -404,7 +404,7 @@ function render(){
 
 function updateTime(){
   if (!S || !S.running || S.paused) return;
-  el.hudTime.textContent = ((performance.now() - S.startAt) / 1000).toFixed(1) + 'びょう';
+  el.hudTime.textContent = ((performance.now() - S.startAt) / 1000).toFixed(1) + '秒';
 }
 
 // つよさボタンの右に、そのつよさの記録を出す（山札ありのときは そのモードの記録）
@@ -414,7 +414,7 @@ function updateRecords(){
     if (!node) continue;
     const rec = store.recs[recKey(d)];
     node.innerHTML = rec && rec.best !== null
-      ? `さいこう<br>${rec.best}びょう` + (rec.bestStreak >= 2 ? `<br>${rec.bestStreak}れんしょう` : '')
+      ? `ベスト<br>${rec.best}秒` + (rec.bestStreak >= 2 ? `<br>${rec.bestStreak}回 つづけて` : '')
       : '<span class="none">きろく<br>なし</span>';
   }
 }

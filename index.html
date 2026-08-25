@@ -22,25 +22,25 @@
     <h1 class="logo">スピード</h1>
     <p class="logo-sub">トランプの スピード</p>
 
-    <div class="diff-group" role="radiogroup" aria-label="つよさ">
+    <div class="diff-group" role="radiogroup" aria-label="強さ">
       <button class="diff-btn" data-diff="easy" role="radio" aria-checked="false">
         <span class="diff-main">
           <span class="diff-name">やさしい</span>
-          <span class="diff-desc">あいてが とても ゆっくり</span>
+          <span class="diff-desc">相手が とても ゆっくり</span>
         </span>
         <span class="diff-rec" data-rec="easy"></span>
       </button>
       <button class="diff-btn selected" data-diff="normal" role="radio" aria-checked="true">
         <span class="diff-main">
           <span class="diff-name">ふつう</span>
-          <span class="diff-desc">あいてが ふつうの はやさ</span>
+          <span class="diff-desc">相手が ふつうの 速さ</span>
         </span>
         <span class="diff-rec" data-rec="normal"></span>
       </button>
       <button class="diff-btn" data-diff="hard" role="radio" aria-checked="false">
         <span class="diff-main">
           <span class="diff-name">むずかしい</span>
-          <span class="diff-desc">あいてが はやい</span>
+          <span class="diff-desc">相手が 速い</span>
         </span>
         <span class="diff-rec" data-rec="hard"></span>
       </button>
@@ -48,22 +48,22 @@
 
     <div class="opt-row">
       <span class="opt-label">あなたの ふだ</span>
-      <div class="seg" role="radiogroup" aria-label="あなたの ふだの いろ">
+      <div class="seg" role="radiogroup" aria-label="あなたの ふだの色">
         <button class="seg-btn selected" data-color="red" role="radio" aria-checked="true">あか ♥♦</button>
         <button class="seg-btn" data-color="black" role="radio" aria-checked="false">くろ ♠♣</button>
       </div>
     </div>
 
     <div class="opt-row">
-      <span class="opt-label">やまふだ（じぶんで ひく）</span>
-      <div class="seg" role="radiogroup" aria-label="やまふだ">
+      <span class="opt-label">山ふだ（自分で ひく）</span>
+      <div class="seg" role="radiogroup" aria-label="山ふだ">
         <button class="seg-btn selected" data-draw="off" role="radio" aria-checked="true">なし</button>
         <button class="seg-btn" data-draw="on" role="radio" aria-checked="false">あり</button>
       </div>
     </div>
 
     <div class="opt-row">
-      <span class="opt-label">ヒント（だせる ふだが ひかる）</span>
+      <span class="opt-label">ヒント（出せるふだが 光る）</span>
       <div class="seg" role="radiogroup" aria-label="ヒント">
         <button class="seg-btn selected" data-hint="off" role="radio" aria-checked="true">なし</button>
         <button class="seg-btn" data-hint="on" role="radio" aria-checked="false">あり</button>
@@ -71,34 +71,34 @@
     </div>
 
     <div class="opt-row">
-      <span class="opt-label">おと</span>
-      <div class="seg" role="radiogroup" aria-label="おと">
+      <span class="opt-label">音</span>
+      <div class="seg" role="radiogroup" aria-label="音">
         <button class="seg-btn" data-sound="off" role="radio" aria-checked="false">なし</button>
         <button class="seg-btn selected" data-sound="on" role="radio" aria-checked="true">あり</button>
       </div>
     </div>
 
-    <button id="startBtn" class="primary-btn">はじめる</button>
-    <button id="rulesBtn" class="ghost-btn">あそびかた</button>
+    <button id="startBtn" class="primary-btn">始める</button>
+    <button id="rulesBtn" class="ghost-btn">遊びかた</button>
   </div>
 </section>
 
 <!-- ===== ゲーム画面 ===== -->
 <section id="gameScreen" class="screen">
   <header class="hud">
-    <button id="backBtn" class="hud-btn" aria-label="ひとやすみ">||</button>
+    <button id="backBtn" class="hud-btn" aria-label="ひと休み">||</button>
     <div class="hud-center">
       <span id="hudDiff" class="hud-diff">ふつう</span>
-      <span id="hudTime" class="hud-time">0.0びょう</span>
+      <span id="hudTime" class="hud-time">0.0秒</span>
     </div>
-    <button id="helpBtn" class="hud-btn" aria-label="あそびかた">?</button>
+    <button id="helpBtn" class="hud-btn" aria-label="遊びかた">?</button>
   </header>
 
   <div class="board">
     <!-- あいて -->
     <div class="side cpu">
       <div class="side-label">
-        <span class="who">あいて</span>
+        <span class="who">相手</span>
         <span class="stock" id="cpuStock">のこり 22まい</span>
       </div>
       <div class="hand-row">
@@ -135,44 +135,44 @@
 <!-- ===== けっか ===== -->
 <section id="resultScreen" class="screen">
   <div class="result-inner">
-    <h2 id="resultTitle">かち！</h2>
+    <h2 id="resultTitle">勝ち！</h2>
     <p id="resultText"></p>
     <p id="resultRecord" class="record"></p>
-    <button id="retryBtn" class="primary-btn">もういちど</button>
-    <button id="toTitleBtn" class="ghost-btn">さいしょへ</button>
+    <button id="retryBtn" class="primary-btn">もう一度</button>
+    <button id="toTitleBtn" class="ghost-btn">はじめの画面へ</button>
   </div>
 </section>
 
 <!-- ===== ひとやすみ ===== -->
 <div id="pauseOverlay" class="overlay">
   <div class="dialog">
-    <h2>ひとやすみ</h2>
-    <p>つづきから あそべます。</p>
+    <h2>ひと休み</h2>
+    <p>つづきから 遊べます。</p>
     <button id="resumeBtn" class="primary-btn">つづける</button>
-    <button id="quitBtn" class="ghost-btn">やめて さいしょへ</button>
+    <button id="quitBtn" class="ghost-btn">やめて はじめの画面へ</button>
   </div>
 </div>
 
 <!-- ===== あそびかた ===== -->
 <div id="rulesOverlay" class="overlay">
   <div class="dialog rules">
-    <h2>あそびかた</h2>
+    <h2>遊びかた</h2>
     <ol>
-      <li>トランプ52まいを いろで はんぶんこ。<b>あなたは あか（♥♦）26まい</b>、あいては くろ（♠♣）26まいを つかいます。</li>
-      <li>てふだは 4まい。まんなかの「ばのふだ」は ひだりと みぎの 2つ。</li>
-      <li>ばのふだの いちばん うえと <b>すうじが 1ちがい</b>の てふだを だせます。<b>A と K は つながって います</b>（…Q・K・A・2…）。</li>
-      <li><b>おなじ すうじは だせません</b>（8の うえに 8は だめ）。てふだに おなじ すうじが あっても <b>かさねられません</b>。</li>
-      <li>だしたら すぐ やまふだから てふだを 4まいに もどします。<b>じゅんばんは なくて、はやいもの がち</b>です。</li>
-      <li>ふたりとも だせなく なったら、「せーの！」の あとに ふたりとも やまふだから 1まい だして つづけます。</li>
-      <li>てふだと やまふだを <b>さきに ぜんぶ なくした ほうの かち</b>！</li>
+      <li>トランプ52まいを 色で 半分ずつ。<b>あなたは 赤（♥♦）26まい</b>、相手は 黒（♠♣）26まいを 使います。</li>
+      <li>手ふだは 4まい。真ん中の「場のふだ」は 左と 右の 2つ。</li>
+      <li>場のふだの 一番上と <b>数字が 1つ ちがい</b>の 手ふだを 出せます。<b>A と K は つながって います</b>（…Q・K・A・2…）。</li>
+      <li><b>同じ数字は 出せません</b>（8の 上に 8は だめ）。手ふだに 同じ数字が あっても <b>重ねられません</b>。</li>
+      <li>出したら すぐ 山ふだから 手ふだを 4まいに もどします。<b>じゅんばんは なくて、早いもの がち</b>です。</li>
+      <li>二人とも 出せなく なったら、「せーの！」の あとに 二人とも 山ふだから 1まい 出して つづけます。</li>
+      <li>手ふだと 山ふだを <b>先に 全部 なくした ほうの 勝ち</b>！</li>
     </ol>
-    <h3>「やまふだ あり」で あそぶとき</h3>
-    <p>だした ぶんの てふだは <b>へったまま</b>です。<b>やまふだを タップ</b>すると 1まいずつ
-    ふえます。じぶんで ひく ぶん、すこし むずかしく なります（あいても おなじ ルールです）。</p>
+    <h3>「山ふだ あり」で 遊ぶとき</h3>
+    <p>出した ぶんの 手ふだは <b>へったまま</b>です。<b>山ふだを タップ</b>すると 1まいずつ
+    ふえます。自分で ひく ぶん、少し むずかしく なります（相手も 同じ ルールです）。</p>
 
     <h3>そうさ</h3>
-    <p>てふだを タップして えらび、<b>だしたい ばのふだ（ひだり か みぎ）を タップ</b>します。<br>
-    ばのふだを さきに タップすると、だせる てふだを じどうで だします。</p>
+    <p>手ふだを タップして えらび、<b>出したい 場のふだ（左か 右）を タップ</b>します。<br>
+    場のふだを 先に タップすると、出せる 手ふだを 自動で 出します。</p>
     <button id="closeRulesBtn" class="primary-btn">とじる</button>
   </div>
 </div>
