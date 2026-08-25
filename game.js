@@ -18,9 +18,9 @@ const el = {
   cpuHand:$('#cpuHand'), myHand:$('#myHand'),
   pile0:$('#pile0'), pile1:$('#pile1'),
   cpuStock:$('#cpuStock'), myStock:$('#myStock'),
+  myDeck:$('#myDeck'), cpuDeck:$('#cpuDeck'),
   centerMsg:$('#centerMsg'), hudTime:$('#hudTime'), hudDiff:$('#hudDiff'),
   resultTitle:$('#resultTitle'), resultText:$('#resultText'), resultRecord:$('#resultRecord'),
-  bestLine:$('#bestLine'),
   pauseOverlay:$('#pauseOverlay'), rulesOverlay:$('#rulesOverlay'),
 };
 
@@ -29,7 +29,7 @@ const STORE_KEY = 'speed-card-game/v1';
 const store = loadStore();
 
 function loadStore(){
-  const base = { opts:{ diff:'normal', color:'red', hint:false, sound:true }, recs:{} };
+  const base = { opts:{ diff:'normal', color:'red', hint:false, sound:true, draw:false }, recs:{} };
   try {
     const raw = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
     if (raw && raw.opts) return { opts:{ ...base.opts, ...raw.opts }, recs: raw.recs || {} };
@@ -37,6 +37,8 @@ function loadStore(){
   return base;
 }
 function saveStore(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) {} }
+// 山札ありは別ゲームなので記録も分けて持つ
+const recKey = d => (drawMode ? d + '+draw' : d);
 function recOf(key){
   return store.recs[key] || (store.recs[key] = { best:null, wins:0, streak:0, bestStreak:0 });
 }
@@ -44,6 +46,7 @@ function recOf(key){
 /* ========== 状態 ========== */
 let diffKey = 'normal';
 let hintOn  = false;
+let drawMode = false;
 let myColor = 'red';
 let soundOn = true;
 let S = null;
@@ -158,7 +161,7 @@ function flipCenter(){
     if (p.stock.length){ S.center[idx].push(p.stock.pop()); flipped++; }
   });
   if (!flipped && !recycle()) return;   // 山札が尽きていたら台札を回収して再配分
-  refill('me'); refill('cpu');
+  autoRefill('me'); autoRefill('cpu');
   SFX.flip();
   render();
 }
@@ -172,7 +175,7 @@ function recycle(){
   S.center[1] = S.center[1].slice(-1);
   for (const c of buried) S.p[c.color === myColor ? 'me' : 'cpu'].stock.push(c);
   shuffle(S.p.me.stock); shuffle(S.p.cpu.stock);
-  refill('me'); refill('cpu');
+  autoRefill('me'); autoRefill('cpu');
   flash('ふだを まぜなおし！');
   ['me','cpu'].forEach((side, idx) => {
     if (S.p[side].stock.length) S.center[idx].push(S.p[side].stock.pop());
@@ -190,12 +193,27 @@ function refill(side){
   for (let i=0;i<4;i++) if (!p.hand[i] && p.stock.length) p.hand[i] = p.stock.pop();
 }
 
+// 「やまふだ あり」では自動で補充しない（自分でタップして引く）
+function autoRefill(side){ if (!drawMode) refill(side); }
+
+const canDraw = side => S.p[side].stock.length > 0 && S.p[side].hand.includes(null);
+
+function drawOne(side){
+  const p = S.p[side];
+  if (!canDraw(side)) return false;
+  for (let i=0;i<4;i++) if (!p.hand[i]){ p.hand[i] = p.stock.pop(); break; }
+  return true;
+}
+
+// その人がまだ何かできるか（出せる or 引ける）
+function canAct(side){ return movesOf(side).length > 0 || (drawMode && canDraw(side)); }
+
 function play(side, i, p){
   const card = S.p[side].hand[i];
   if (!card || !canPlace(card, S.center[p])) return false;
   S.p[side].hand[i] = null;
   S.center[p].push(card);
-  refill(side);
+  autoRefill(side);
   S.recycles = 0;
   if (side === 'me'){ S.selected = null; SFX.play(); } else { SFX.cpu(); }
   render();
@@ -211,7 +229,7 @@ function finish(winner){
   el.centerMsg.textContent = '';
 
   // 記録を更新
-  const rec = recOf(diffKey);
+  const rec = recOf(recKey(diffKey));
   let newBest = false;
   if (winner === 'me'){
     rec.wins++; rec.streak++;
@@ -221,7 +239,7 @@ function finish(winner){
     rec.streak = 0;
   }
   saveStore();
-  updateBestLine();
+  updateRecords();
 
   const win = winner === 'me';
   el.resultTitle.textContent = winner === 'draw' ? 'ひきわけ' : win ? 'かち！' : 'まけ…';
@@ -283,7 +301,11 @@ function cpuTurn(){
   if (!S || !S.running || S.paused) return;
   const d = DIFF[diffKey];
   const moves = movesOf('cpu');
-  if (!moves.length){ scheduleCpu(200); return; }
+  if (!moves.length){
+    // 出せないときは、あいても1タップぶん時間をかけて山札から引く
+    if (drawMode && canDraw('cpu')){ drawOne('cpu'); SFX.cpu(); render(); scheduleCpu(rand(d.min, d.max)); return; }
+    scheduleCpu(200); return;
+  }
   if (Math.random() < d.miss){ scheduleCpu(rand(d.min, d.max)); return; }  // 見落とし
   const [i, p] = pick(moves, d.smart);
   play('cpu', i, p);
@@ -313,7 +335,7 @@ function pick(moves, smart){
 /* ========== 手詰まり判定 ========== */
 function checkStuck(){
   if (!S || !S.running || S.paused) return;
-  if (movesOf('me').length || movesOf('cpu').length) return;
+  if (canAct('me') || canAct('cpu')) return;
   clearInterval(stuckTimer); stuckTimer = null;
   clearTimeout(cpuTimer);
 
@@ -370,6 +392,12 @@ function render(){
       (pile.length > 1 ? `<span class="pile-count">${pile.length}</span>` : '');
   });
 
+  [['me', el.myDeck], ['cpu', el.cpuDeck]].forEach(([side, node]) => {
+    const n = S.p[side].stock.length;
+    node.innerHTML = `<div class="card back ${n ? '' : 'gone'}"></div>` +
+      (n ? `<span class="deck-count">${n}</span>` : '');
+  });
+
   el.myStock.textContent  = `のこり ${remaining('me')}まい`;
   el.cpuStock.textContent = `のこり ${remaining('cpu')}まい`;
 }
@@ -379,12 +407,16 @@ function updateTime(){
   el.hudTime.textContent = ((performance.now() - S.startAt) / 1000).toFixed(1) + 'びょう';
 }
 
-function updateBestLine(){
-  const rec = store.recs[diffKey];
-  el.bestLine.textContent = rec && rec.best !== null
-    ? `${DIFF[diffKey].label}の さいこうきろく ${rec.best}びょう` +
-      (rec.bestStreak >= 2 ? `／さいこう ${rec.bestStreak}れんしょう` : '')
-    : 'まだ きろくが ありません';
+// つよさボタンの右に、そのつよさの記録を出す（山札ありのときは そのモードの記録）
+function updateRecords(){
+  for (const d of Object.keys(DIFF)){
+    const node = document.querySelector(`[data-rec="${d}"]`);
+    if (!node) continue;
+    const rec = store.recs[recKey(d)];
+    node.innerHTML = rec && rec.best !== null
+      ? `さいこう<br>${rec.best}びょう` + (rec.bestStreak >= 2 ? `<br>${rec.bestStreak}れんしょう` : '')
+      : '<span class="none">きろく<br>なし</span>';
+  }
 }
 
 function shakeSlot(i){
@@ -406,6 +438,18 @@ el.myHand.addEventListener('click', e => {
 
   // 左右どちらに出すかは必ずプレイヤーが選ぶ（選択 → 台札をタップ）
   S.selected = (S.selected === i) ? null : i;
+  render();
+});
+
+el.myDeck.addEventListener('click', () => {
+  if (!playable() || !drawMode) return;
+  if (!drawOne('me')){                      // 引けないときは知らせるだけ
+    const c = el.myDeck.querySelector('.card');
+    if (c){ c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake'); }
+    SFX.ng();
+    return;
+  }
+  SFX.play();
   render();
 });
 
@@ -432,12 +476,17 @@ function markSel(key, value){
 document.querySelectorAll('.diff-btn').forEach(btn => btn.addEventListener('click', () => {
   diffKey = store.opts.diff = btn.dataset.diff;
   markSel('diff', diffKey);
-  updateBestLine();
   saveStore();
 }));
 
 document.querySelectorAll('.seg-btn').forEach(btn => btn.addEventListener('click', () => {
   if (btn.dataset.color){ myColor = store.opts.color = btn.dataset.color; markSel('color', myColor); }
+  if (btn.dataset.draw){
+    drawMode = store.opts.draw = btn.dataset.draw === 'on';
+    markSel('draw', btn.dataset.draw);
+    document.body.classList.toggle('draw', drawMode);
+    updateRecords();
+  }
   if (btn.dataset.hint){ hintOn = store.opts.hint = btn.dataset.hint === 'on'; markSel('hint', btn.dataset.hint); }
   if (btn.dataset.sound){
     soundOn = store.opts.sound = btn.dataset.sound === 'on';
@@ -471,11 +520,14 @@ diffKey = store.opts.diff;
 myColor = store.opts.color;
 hintOn  = store.opts.hint;
 soundOn = store.opts.sound;
+drawMode = store.opts.draw;
+document.body.classList.toggle('draw', drawMode);
 markSel('diff', diffKey);
+markSel('draw', drawMode ? 'on' : 'off');
 markSel('color', myColor);
 markSel('hint', hintOn ? 'on' : 'off');
 markSel('sound', soundOn ? 'on' : 'off');
-updateBestLine();
+updateRecords();
 
 if ('serviceWorker' in navigator)
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));

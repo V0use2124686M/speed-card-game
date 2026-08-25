@@ -1,6 +1,7 @@
 /* オフラインで遊べるようにする Service Worker。
-   ファイルを更新したら CACHE のバージョンを上げること。 */
-const CACHE = 'speed-v1';
+   ネットワーク優先（つながっていれば必ず最新を表示し、圏外ならキャッシュで動く）。
+   ASSETS を増減したときは CACHE のバージョンを上げる。 */
+const CACHE = 'speed-v2';
 const ASSETS = [
   './',
   'index.html',
@@ -24,16 +25,18 @@ self.addEventListener('activate', e => {
   );
 });
 
-// キャッシュ優先。裏で取り直して次回に備える（オフラインでも必ず開ける）
+// ネットワーク優先・キャッシュはひかえ（更新が確実に届く／圏外でも開ける）
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    caches.match(e.request).then(hit => {
-      const fresh = fetch(e.request).then(res => {
-        if (res && res.ok) caches.open(CACHE).then(c => c.put(e.request, res.clone()));
+    fetch(e.request)
+      .then(res => {
+        if (res && res.ok){
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, copy));
+        }
         return res;
-      }).catch(() => hit);
-      return hit || fresh;
-    })
+      })
+      .catch(() => caches.match(e.request).then(hit => hit || caches.match('index.html')))
   );
 });

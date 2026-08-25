@@ -39,12 +39,17 @@ body{
 .diff-btn{
   appearance:none;border:2px solid rgba(255,255,255,.22);background:rgba(255,255,255,.06);
   color:#fff;border-radius:14px;padding:11px 14px;text-align:left;cursor:pointer;
-  display:flex;flex-direction:column;gap:3px;transition:.15s;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;transition:.15s;
 }
+.diff-main{display:flex;flex-direction:column;gap:3px;min-width:0;}
+.diff-rec{
+  flex:0 0 auto;text-align:right;white-space:nowrap;font-size:11px;line-height:1.45;
+  color:var(--gold);opacity:.9;font-variant-numeric:tabular-nums;
+}
+.diff-rec .none{color:#fff;opacity:.4;}
 .diff-btn.selected{border-color:var(--gold);background:rgba(242,193,78,.16);}
 .diff-name{font-size:17px;font-weight:700;}
 .diff-desc{font-size:12px;opacity:.72;}
-.best-line{font-size:12px;opacity:.7;margin:-8px 0 14px;min-height:1.2em;}
 .opt-row{
   display:flex;align-items:center;justify-content:space-between;gap:10px;
   margin:0 0 12px;padding:0 2px;
@@ -90,7 +95,25 @@ body{
 .side-label{display:flex;justify-content:space-between;align-items:baseline;padding:0 4px;font-size:13px;opacity:.85;}
 .side-label .who{font-weight:700;letter-spacing:.08em;}
 .side-label .stock{font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--gold);}
+.hand-row{display:flex;gap:6px;justify-content:center;align-items:center;}
 .hand{display:grid;grid-template-columns:repeat(4,var(--card-w));gap:6px;justify-content:center;}
+
+/* 山札（「やまふだ あり」のときだけ出す） */
+.deck{display:none;width:var(--card-w);position:relative;}
+body.draw .deck{display:block;}
+body.draw{--card-w: min(17.5vw, 15vh, 92px);}
+.card.back{
+  background:repeating-linear-gradient(45deg,#17427e,#17427e 5px,#2a67b8 5px,#2a67b8 10px);
+  border:2px solid rgba(255,255,255,.85);
+}
+.card.back.gone{background:rgba(255,255,255,.07);border:2px dashed rgba(255,255,255,.2);box-shadow:none;}
+.deck-count{
+  position:absolute;left:50%;bottom:6px;transform:translateX(-50%);
+  background:#000c;color:#fff;font-size:12px;font-weight:700;border-radius:10px;padding:1px 8px;
+  font-variant-numeric:tabular-nums;
+}
+#myDeck .card{cursor:pointer;}
+body.draw #myDeck .card:not(.gone){box-shadow:var(--shadow),0 0 0 2px rgba(242,193,78,.5);}
 
 .center{
   display:flex;align-items:center;justify-content:center;gap:min(6vw,34px);

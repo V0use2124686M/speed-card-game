@@ -24,26 +24,41 @@
 
     <div class="diff-group" role="radiogroup" aria-label="つよさ">
       <button class="diff-btn" data-diff="easy" role="radio" aria-checked="false">
-        <span class="diff-name">やさしい</span>
-        <span class="diff-desc">あいてが とても ゆっくり</span>
+        <span class="diff-main">
+          <span class="diff-name">やさしい</span>
+          <span class="diff-desc">あいてが とても ゆっくり</span>
+        </span>
+        <span class="diff-rec" data-rec="easy"></span>
       </button>
       <button class="diff-btn selected" data-diff="normal" role="radio" aria-checked="true">
-        <span class="diff-name">ふつう</span>
-        <span class="diff-desc">あいてが ふつうの はやさ</span>
+        <span class="diff-main">
+          <span class="diff-name">ふつう</span>
+          <span class="diff-desc">あいてが ふつうの はやさ</span>
+        </span>
+        <span class="diff-rec" data-rec="normal"></span>
       </button>
       <button class="diff-btn" data-diff="hard" role="radio" aria-checked="false">
-        <span class="diff-name">むずかしい</span>
-        <span class="diff-desc">あいてが はやい</span>
+        <span class="diff-main">
+          <span class="diff-name">むずかしい</span>
+          <span class="diff-desc">あいてが はやい</span>
+        </span>
+        <span class="diff-rec" data-rec="hard"></span>
       </button>
     </div>
-
-    <p id="bestLine" class="best-line"></p>
 
     <div class="opt-row">
       <span class="opt-label">あなたの ふだ</span>
       <div class="seg" role="radiogroup" aria-label="あなたの ふだの いろ">
         <button class="seg-btn selected" data-color="red" role="radio" aria-checked="true">あか ♥♦</button>
         <button class="seg-btn" data-color="black" role="radio" aria-checked="false">くろ ♠♣</button>
+      </div>
+    </div>
+
+    <div class="opt-row">
+      <span class="opt-label">やまふだ（じぶんで ひく）</span>
+      <div class="seg" role="radiogroup" aria-label="やまふだ">
+        <button class="seg-btn selected" data-draw="off" role="radio" aria-checked="true">なし</button>
+        <button class="seg-btn" data-draw="on" role="radio" aria-checked="false">あり</button>
       </div>
     </div>
 
@@ -86,7 +101,10 @@
         <span class="who">あいて</span>
         <span class="stock" id="cpuStock">のこり 22まい</span>
       </div>
-      <div class="hand" id="cpuHand"></div>
+      <div class="hand-row">
+        <div class="deck" id="cpuDeck"></div>
+        <div class="hand" id="cpuHand"></div>
+      </div>
     </div>
 
     <!-- ばのふだ -->
@@ -102,7 +120,10 @@
 
     <!-- あなた -->
     <div class="side me">
-      <div class="hand" id="myHand"></div>
+      <div class="hand-row">
+        <div class="deck" id="myDeck"></div>
+        <div class="hand" id="myHand"></div>
+      </div>
       <div class="side-label">
         <span class="who">あなた</span>
         <span class="stock" id="myStock">のこり 22まい</span>
@@ -145,6 +166,10 @@
       <li>ふたりとも だせなく なったら、「せーの！」の あとに ふたりとも やまふだから 1まい だして つづけます。</li>
       <li>てふだと やまふだを <b>さきに ぜんぶ なくした ほうの かち</b>！</li>
     </ol>
+    <h3>「やまふだ あり」で あそぶとき</h3>
+    <p>だした ぶんの てふだは <b>へったまま</b>です。<b>やまふだを タップ</b>すると 1まいずつ
+    ふえます。じぶんで ひく ぶん、すこし むずかしく なります（あいても おなじ ルールです）。</p>
+
     <h3>そうさ</h3>
     <p>てふだを タップして えらび、<b>だしたい ばのふだ（ひだり か みぎ）を タップ</b>します。<br>
     ばのふだを さきに タップすると、だせる てふだを じどうで だします。</p>
