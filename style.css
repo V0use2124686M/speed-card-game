@@ -26,18 +26,19 @@ body{
 .screen.active{display:flex;}
 
 /* ---------- タイトル ---------- */
+#titleScreen{overflow-y:auto;}   /* 小さい画面でも下まで届くように */
 .title-inner{
-  margin:auto;padding:24px;width:100%;max-width:420px;text-align:center;
+  margin:auto;padding:20px 24px;width:100%;max-width:420px;text-align:center;
 }
 .logo{
   font-size:clamp(40px,13vw,64px);margin:0;letter-spacing:.12em;
   color:var(--gold);text-shadow:0 3px 0 #00000055;
 }
-.logo-sub{margin:4px 0 28px;opacity:.75;font-size:13px;letter-spacing:.14em;}
-.diff-group{display:flex;flex-direction:column;gap:10px;margin-bottom:26px;}
+.logo-sub{margin:4px 0 20px;opacity:.75;font-size:13px;letter-spacing:.14em;}
+.diff-group{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
 .diff-btn{
   appearance:none;border:2px solid rgba(255,255,255,.22);background:rgba(255,255,255,.06);
-  color:#fff;border-radius:14px;padding:13px 14px;text-align:left;cursor:pointer;
+  color:#fff;border-radius:14px;padding:11px 14px;text-align:left;cursor:pointer;
   display:flex;flex-direction:column;gap:3px;transition:.15s;
 }
 .diff-btn.selected{border-color:var(--gold);background:rgba(242,193,78,.16);}
@@ -45,13 +46,13 @@ body{
 .diff-desc{font-size:12px;opacity:.72;}
 .opt-row{
   display:flex;align-items:center;justify-content:space-between;gap:10px;
-  margin:-12px 0 24px;padding:0 2px;
+  margin:0 0 12px;padding:0 2px;
 }
 .opt-label{font-size:13px;opacity:.75;}
 .seg{display:flex;border:1px solid rgba(255,255,255,.25);border-radius:10px;overflow:hidden;flex:0 0 auto;}
 .seg-btn{
   appearance:none;border:none;background:transparent;color:#fff;
-  padding:8px 16px;font-size:14px;cursor:pointer;opacity:.6;
+  padding:7px 14px;font-size:14px;cursor:pointer;opacity:.6;
 }
 .seg-btn.selected{background:var(--gold);color:#3a2a00;font-weight:700;opacity:1;}
 
@@ -85,9 +86,9 @@ body{
   padding:2px 8px 10px;min-height:0;
 }
 .side{display:flex;flex-direction:column;gap:4px;}
-.side-label{display:flex;justify-content:space-between;align-items:center;padding:0 4px;font-size:12px;opacity:.8;}
+.side-label{display:flex;justify-content:space-between;align-items:baseline;padding:0 4px;font-size:13px;opacity:.85;}
 .side-label .who{font-weight:700;letter-spacing:.08em;}
-.side-label .stock{font-variant-numeric:tabular-nums;}
+.side-label .stock{font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--gold);}
 .hand{display:grid;grid-template-columns:repeat(4,var(--card-w));gap:6px;justify-content:center;}
 
 .center{
@@ -141,6 +142,11 @@ body{
 
 .cpu .hand .card{opacity:.95;}
 
+/* ---------- 結果画面 ---------- */
+.result-inner{margin:auto;padding:24px;width:100%;max-width:380px;text-align:center;}
+#resultTitle{margin:0 0 10px;font-size:clamp(44px,15vw,72px);letter-spacing:.06em;text-shadow:0 3px 0 #00000055;}
+#resultText{margin:0 0 30px;font-size:15px;opacity:.85;line-height:1.7;}
+
 /* ---------- オーバーレイ ---------- */
 .overlay{
   position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);
@@ -165,6 +171,9 @@ body{
   .board{padding-bottom:2px;}
   .center{padding:0;}
   .hud{padding:2px 10px;}
+  .side{gap:2px;}
+  .side-label{font-size:12px;}
+  .side-label .stock{font-size:15px;}
   /* 上に置く余白がないので台札の間に重ねる */
   .center-msg{top:50%;transform:translate(-50%,-50%);flex-direction:row;align-items:baseline;gap:7px;padding:5px 11px;}
   .center-msg .count{font-size:22px;}

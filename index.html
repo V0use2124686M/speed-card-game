@@ -34,6 +34,14 @@
     </div>
 
     <div class="opt-row">
+      <span class="opt-label">あなたの札</span>
+      <div class="seg" role="radiogroup" aria-label="自分の札の色">
+        <button class="seg-btn selected" data-color="red" role="radio" aria-checked="true">赤 ♥♦</button>
+        <button class="seg-btn" data-color="black" role="radio" aria-checked="false">黒 ♠♣</button>
+      </div>
+    </div>
+
+    <div class="opt-row">
       <span class="opt-label">補助（出せる札を光らせる）</span>
       <div class="seg" role="radiogroup" aria-label="補助">
         <button class="seg-btn selected" data-hint="off" role="radio" aria-checked="true">なし</button>
@@ -90,14 +98,14 @@
 </section>
 
 <!-- ===== 結果 ===== -->
-<div id="resultOverlay" class="overlay">
-  <div class="dialog">
+<section id="resultScreen" class="screen">
+  <div class="result-inner">
     <h2 id="resultTitle">WIN!</h2>
     <p id="resultText"></p>
     <button id="retryBtn" class="primary-btn">もう一回</button>
     <button id="toTitleBtn" class="ghost-btn">タイトルへ</button>
   </div>
-</div>
+</section>
 
 <!-- ===== ルール ===== -->
 <div id="rulesOverlay" class="overlay">

@@ -6,27 +6,27 @@ const RANK_LABEL = { 1:'A', 11:'J', 12:'Q', 13:'K' };
 const SUITS = { red:['♥','♦'], black:['♠','♣'] };
 
 const DIFF = {
-  easy:   { label:'やさしい',   min:1000, max:1700, miss:0.40, smart:false },
-  normal: { label:'ふつう',     min:520,  max:900,  miss:0.15, smart:false },
-  hard:   { label:'むずかしい', min:230,  max:400,  miss:0.02, smart:true  },
+  easy:   { label:'やさしい',   min:1800, max:2800, miss:0.50, smart:false },
+  normal: { label:'ふつう',     min:950,  max:1600, miss:0.25, smart:false },
+  hard:   { label:'むずかしい', min:480,  max:800,  miss:0.08, smart:true  },
 };
 
 const STUCK_WAIT = 5000;   // 出せる札がなくなってから場に出すまでの溜め
 
 const $ = sel => document.querySelector(sel);
 const el = {
-  titleScreen:$('#titleScreen'), gameScreen:$('#gameScreen'),
   cpuHand:$('#cpuHand'), myHand:$('#myHand'),
   pile0:$('#pile0'), pile1:$('#pile1'),
   cpuStock:$('#cpuStock'), myStock:$('#myStock'),
   centerMsg:$('#centerMsg'), hudTime:$('#hudTime'), hudDiff:$('#hudDiff'),
-  resultOverlay:$('#resultOverlay'), resultTitle:$('#resultTitle'), resultText:$('#resultText'),
+  resultTitle:$('#resultTitle'), resultText:$('#resultText'),
   rulesOverlay:$('#rulesOverlay'),
 };
 
 /* ========== 状態 ========== */
 let diffKey = 'normal';
 let hintOn = false;
+let myColor = 'red';
 let S = null;
 let cpuTimer = null, stuckTimer = null, tickTimer = null, countTimer = null;
 
@@ -60,7 +60,7 @@ const remaining = side => S.p[side].stock.length + S.p[side].hand.filter(Boolean
 /* ========== ゲーム進行 ========== */
 function startGame(){
   clearTimers();
-  const mine = buildDeck('red'), theirs = buildDeck('black');
+  const mine = buildDeck(myColor), theirs = buildDeck(myColor === 'red' ? 'black' : 'red');
   S = {
     p: {
       me:  { hand:[mine.pop(),   mine.pop(),   mine.pop(),   mine.pop()],   stock:mine   },
@@ -108,7 +108,7 @@ function recycle(){
   if (!buried.length || ++S.recycles > 3){ judgeByCount(); return false; }
   S.center[0] = S.center[0].slice(-1);
   S.center[1] = S.center[1].slice(-1);
-  for (const c of buried) S.p[c.color === 'red' ? 'me' : 'cpu'].stock.push(c);
+  for (const c of buried) S.p[c.color === myColor ? 'me' : 'cpu'].stock.push(c);
   shuffle(S.p.me.stock); shuffle(S.p.cpu.stock);
   refill('me'); refill('cpu');
   flash('台札をシャッフル！');
@@ -154,7 +154,8 @@ function finish(winner){
     ? `決着つかず。<br>タイム ${sec}秒`
     : `${DIFF[diffKey].label} / タイム ${sec}秒<br>` +
       (win ? `CPUの残り ${remaining('cpu')}枚` : `あなたの残り ${remaining('me')}枚`);
-  setTimeout(() => el.resultOverlay.classList.add('show'), 450);
+  // 最後の1枚を見せてから結果画面へ（その間にやめられていたら出さない）
+  setTimeout(() => { if ($('#gameScreen').classList.contains('active')) show('result'); }, 700);
 }
 
 function clearTimers(){
@@ -209,11 +210,11 @@ function checkStuck(){
   clearTimeout(cpuTimer);
 
   let left = Math.round(STUCK_WAIT / 1000);
-  const show = () => { el.centerMsg.innerHTML = `せーの！<span class="count">${left}</span>`; };
-  show();
+  const paint = () => { el.centerMsg.innerHTML = `せーの！<span class="count">${left}</span>`; };
+  paint();
   countTimer = setInterval(() => {
     if (!S || !S.running){ clearInterval(countTimer); countTimer = null; return; }
-    if (--left > 0){ show(); return; }
+    if (--left > 0){ paint(); return; }
     clearInterval(countTimer); countTimer = null;
     el.centerMsg.textContent = '';
     flipCenter();
@@ -299,34 +300,38 @@ el.myHand.addEventListener('click', e => {
   for (let i=0;i<4;i++) if (canPlace(S.p.me.hand[i], S.center[p])){ play('me', i, p); return; }
 }));
 
-/* ========== 画面遷移 ========== */
-document.querySelectorAll('.diff-btn').forEach(btn => btn.addEventListener('click', () => {
-  document.querySelectorAll('.diff-btn').forEach(b => {
+/* ========== タイトル画面の選択 ========== */
+// group 内で1つだけ選ばれている状態にする
+function choose(group, btn){
+  group.querySelectorAll('button').forEach(b => {
     const on = b === btn;
     b.classList.toggle('selected', on);
     b.setAttribute('aria-checked', String(on));
   });
+}
+
+document.querySelectorAll('.diff-btn').forEach(btn => btn.addEventListener('click', () => {
+  choose(btn.parentElement, btn);
   diffKey = btn.dataset.diff;
 }));
 
 document.querySelectorAll('.seg-btn').forEach(btn => btn.addEventListener('click', () => {
-  document.querySelectorAll('.seg-btn').forEach(b => {
-    const on = b === btn;
-    b.classList.toggle('selected', on);
-    b.setAttribute('aria-checked', String(on));
-  });
-  hintOn = btn.dataset.hint === 'on';
+  choose(btn.parentElement, btn);
+  if (btn.dataset.hint) hintOn = btn.dataset.hint === 'on';
+  if (btn.dataset.color) myColor = btn.dataset.color;
 }));
 
+/* ========== 画面遷移 ========== */
+
 function show(screen){
-  el.titleScreen.classList.toggle('active', screen === 'title');
-  el.gameScreen.classList.toggle('active', screen === 'game');
+  for (const name of ['title','game','result'])
+    document.getElementById(name + 'Screen').classList.toggle('active', name === screen);
 }
 
 $('#startBtn').addEventListener('click', () => { show('game'); startGame(); });
-$('#retryBtn').addEventListener('click', () => { el.resultOverlay.classList.remove('show'); startGame(); });
+$('#retryBtn').addEventListener('click', () => { show('game'); startGame(); });
 $('#toTitleBtn').addEventListener('click', () => {
-  el.resultOverlay.classList.remove('show'); clearTimers(); S = null; show('title');
+  clearTimers(); S = null; show('title');
 });
 $('#backBtn').addEventListener('click', () => {
   clearTimers(); if (S) S.running = false; S = null; show('title');
