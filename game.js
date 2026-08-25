@@ -40,7 +40,7 @@ function saveStore(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(store
 // 山札ありは別ゲームなので記録も分けて持つ
 const recKey = d => (drawMode ? d + '+draw' : d);
 function recOf(key){
-  return store.recs[key] || (store.recs[key] = { best:null, wins:0, streak:0, bestStreak:0 });
+  return store.recs[key] || (store.recs[key] = { best:null, bestLeft:null, wins:0, streak:0, bestStreak:0 });
 }
 
 /* ========== 状態 ========== */
@@ -130,6 +130,7 @@ function startGame(){
     paused: false,
     pauseAt: 0,
     startAt: performance.now(),
+    frozenAt: 0,               // 「せーの！」の間は時間を止める
     lastTop: [null, null],
     recycles: 0,
   };
@@ -143,6 +144,7 @@ function startGame(){
 }
 
 function beginPlay(){
+  S.startAt = performance.now();   // はじめの「せーの！」も時間に入れない
   el.centerMsg.textContent = '';
   flipCenter();
   if (S && S.running) startLoops();
@@ -230,11 +232,13 @@ function finish(winner){
 
   // 記録を更新
   const rec = recOf(recKey(diffKey));
-  let newBest = false;
+  const left = remaining('cpu');       // 勝ったときに相手が持っていた まい数（多いほど大差）
+  let newBest = false, newLeft = false;
   if (winner === 'me'){
     rec.wins++; rec.streak++;
     if (rec.streak > rec.bestStreak) rec.bestStreak = rec.streak;
     if (rec.best === null || sec < rec.best){ rec.best = sec; newBest = true; }
+    if (rec.bestLeft == null || left > rec.bestLeft){ rec.bestLeft = left; newLeft = true; }
   } else {
     rec.streak = 0;
   }
@@ -247,11 +251,13 @@ function finish(winner){
   el.resultText.innerHTML = winner === 'draw'
     ? `決着 つかず。<br>${sec}秒`
     : `${DIFF[diffKey].label}　${sec}秒<br>` +
-      (win ? `相手の のこり ${remaining('cpu')}まい` : `あなたの のこり ${remaining('me')}まい`);
+      (win ? `相手の のこり ${left}まい` : `あなたの のこり ${remaining('me')}まい`);
 
   const lines = [];
   if (newBest) lines.push('🎉 いままでで 一番 速い！');
   else if (rec.best !== null) lines.push(`ベスト ${rec.best}秒`);
+  if (newLeft) lines.push('🎉 いままでで 一番 大きな 差！');
+  else if (rec.bestLeft != null) lines.push(`ベスト 相手 ${rec.bestLeft}まい`);
   if (rec.streak >= 2) lines.push(`${rec.streak}回 つづけて 勝ち`);
   el.resultRecord.innerHTML = lines.join('<br>');
 
@@ -266,8 +272,16 @@ function clearTimers(){
 }
 
 /* ========== ひとやすみ（中断・再開） ========== */
+function freeze(){ if (S && !S.frozenAt) S.frozenAt = performance.now(); }
+function unfreeze(){
+  if (!S || !S.frozenAt) return;
+  S.startAt += performance.now() - S.frozenAt;   // 止めていた分は時間に入れない
+  S.frozenAt = 0;
+}
+
 function pause(){
   if (!S || !S.running || S.paused) return;
+  unfreeze();                  // 止めていた分をここで清算しておく
   S.paused = true;
   S.pauseAt = performance.now();
   clearTimers();
@@ -338,6 +352,7 @@ function checkStuck(){
   if (canAct('me') || canAct('cpu')) return;
   clearInterval(stuckTimer); stuckTimer = null;
   clearTimeout(cpuTimer);
+  freeze();
 
   let left = Math.round(STUCK_WAIT / 1000);
   const paint = () => {
@@ -349,6 +364,7 @@ function checkStuck(){
     if (!S || !S.running || S.paused){ clearInterval(countTimer); countTimer = null; return; }
     if (--left > 0){ paint(); return; }
     clearInterval(countTimer); countTimer = null;
+    unfreeze();
     el.centerMsg.textContent = '';
     flipCenter();
     if (!S || !S.running) return;
@@ -403,7 +419,7 @@ function render(){
 }
 
 function updateTime(){
-  if (!S || !S.running || S.paused) return;
+  if (!S || !S.running || S.paused || S.frozenAt) return;
   el.hudTime.textContent = ((performance.now() - S.startAt) / 1000).toFixed(1) + '秒';
 }
 
@@ -414,7 +430,7 @@ function updateRecords(){
     if (!node) continue;
     const rec = store.recs[recKey(d)];
     node.innerHTML = rec && rec.best !== null
-      ? `ベスト<br>${rec.best}秒` + (rec.bestStreak >= 2 ? `<br>${rec.bestStreak}回 つづけて` : '')
+      ? `ベスト<br>${rec.best}秒` + (rec.bestLeft != null ? `<br>相手 ${rec.bestLeft}まい` : '')
       : '<span class="none">きろく<br>なし</span>';
   }
 }
