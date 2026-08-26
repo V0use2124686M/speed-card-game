@@ -12,6 +12,13 @@
 python -m http.server 8123
 ```
 
+## 公開URL（スマホはこちら）
+
+<https://v0use2124686m.github.io/speed-card-game/>
+
+GitHub リポジトリ <https://github.com/V0use2124686M/speed-card-game>（public / GitHub Pages・main ブランチ配信）。
+**main に push すると公開サイトへ自動反映される**ので、main への push は公開操作と同義。
+
 スマホで遊ぶなら、このフォルダを GitHub Pages などの静的ホスティングに置くのが手軽。
 https で配信すると Service Worker が有効になり、「ホーム画面に追加」でアプリのように起動できる
 （`file://` で直接開くと Service Worker は登録されないが、ゲーム自体は動く）。
