@@ -12,7 +12,7 @@ const DIFF = {
 };
 
 const STUCK_WAIT = 5000;   // 出せる札がなくなってから場に出すまでの溜め
-const APP_VERSION = 'v1.1 (2026-08-26)';   // 画面に出す版。中身を変えたら上げる
+const APP_VERSION = 'v1.2 (2026-08-26)';   // 画面に出す版。中身を変えたら上げる
 
 const $ = sel => document.querySelector(sel);
 const el = {
@@ -153,7 +153,7 @@ function beginPlay(){
 }
 
 function startLoops(){
-  scheduleCpu(rand(DIFF[diffKey].min, DIFF[diffKey].max));
+  scheduleCpu(cpuDelay());
   tickTimer  = setInterval(updateTime, 97);
   stuckTimer = setInterval(checkStuck, 220);
 }
@@ -207,6 +207,13 @@ function drawOne(side){
   if (!canDraw(side)) return false;
   for (let i=0;i<4;i++) if (!p.hand[i]){ p.hand[i] = p.stock.pop(); break; }
   return true;
+}
+
+// 「せーの！」のとき、えらんでいなければ 一番左の手ふだを えらんでおく
+// （出す場所を1タップで決められるようにするため）
+function autoSelect(){
+  if (!S || S.selected !== null) return;
+  for (let i=0;i<4;i++) if (S.p.me.hand[i]){ S.selected = i; return; }
 }
 
 // その人がまだ何かできるか（出せる or 引ける）
@@ -313,19 +320,28 @@ function scheduleCpu(ms){
   cpuTimer = setTimeout(cpuTurn, ms);
 }
 
+// やさしいのとき、自分が何もできない（相手だけ出せる）あいだは
+// 見ているだけの時間が長すぎるので、相手を早めに動かす
+function hurrying(){ return diffKey === 'easy' && S && !canAct('me'); }
+
+function cpuDelay(){
+  const d = DIFF[diffKey];
+  return hurrying() ? rand(450, 750) : rand(d.min, d.max);
+}
+
 function cpuTurn(){
   if (!S || !S.running || S.paused) return;
   const d = DIFF[diffKey];
   const moves = movesOf('cpu');
   if (!moves.length){
     // 出せないときは、あいても1タップぶん時間をかけて山札から引く
-    if (drawMode && canDraw('cpu')){ drawOne('cpu'); SFX.cpu(); render(); scheduleCpu(rand(d.min, d.max)); return; }
+    if (drawMode && canDraw('cpu')){ drawOne('cpu'); SFX.cpu(); render(); scheduleCpu(cpuDelay()); return; }
     scheduleCpu(200); return;
   }
-  if (Math.random() < d.miss){ scheduleCpu(rand(d.min, d.max)); return; }  // 見落とし
+  if (!hurrying() && Math.random() < d.miss){ scheduleCpu(cpuDelay()); return; }  // 見落とし
   const [i, p] = pick(moves, d.smart);
   play('cpu', i, p);
-  if (S && S.running) scheduleCpu(rand(d.min, d.max));
+  if (S && S.running) scheduleCpu(cpuDelay());
 }
 
 function pick(moves, smart){
@@ -355,6 +371,8 @@ function checkStuck(){
   clearInterval(stuckTimer); stuckTimer = null;
   clearTimeout(cpuTimer);
   freeze();
+  autoSelect();          // 5秒のあいだに えらび直せる
+  render();
 
   let left = Math.round(STUCK_WAIT / 1000);
   const paint = () => {
@@ -369,8 +387,10 @@ function checkStuck(){
     unfreeze();
     el.centerMsg.textContent = '';
     flipCenter();
+    autoSelect();        // えらばないまま来たら 一番左
+    render();
     if (!S || !S.running) return;
-    scheduleCpu(rand(DIFF[diffKey].min, DIFF[diffKey].max));
+    scheduleCpu(cpuDelay());
     stuckTimer = setInterval(checkStuck, 220);
   }, 1000);
 }
