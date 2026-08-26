@@ -72,6 +72,12 @@ body{
   appearance:none;border:none;background:none;color:#fff;opacity:.7;
   margin-top:12px;padding:10px;font-size:14px;width:100%;cursor:pointer;text-decoration:underline;
 }
+.foot-row{display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding:0 2px;}
+.version{font-size:11px;opacity:.45;font-variant-numeric:tabular-nums;}
+.link-btn{
+  appearance:none;background:none;border:none;color:#fff;opacity:.5;
+  font-size:11px;padding:4px 2px;cursor:pointer;text-decoration:underline;
+}
 
 /* ---------- HUD ---------- */
 .hud{

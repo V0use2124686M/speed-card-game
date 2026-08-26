@@ -12,6 +12,7 @@ const DIFF = {
 };
 
 const STUCK_WAIT = 5000;   // 出せる札がなくなってから場に出すまでの溜め
+const APP_VERSION = 'v1.1 (2026-08-26)';   // 画面に出す版。中身を変えたら上げる
 
 const $ = sel => document.querySelector(sel);
 const el = {
@@ -21,7 +22,8 @@ const el = {
   myDeck:$('#myDeck'), cpuDeck:$('#cpuDeck'),
   centerMsg:$('#centerMsg'), hudTime:$('#hudTime'), hudDiff:$('#hudDiff'),
   resultTitle:$('#resultTitle'), resultText:$('#resultText'), resultRecord:$('#resultRecord'),
-  pauseOverlay:$('#pauseOverlay'), rulesOverlay:$('#rulesOverlay'),
+  pauseOverlay:$('#pauseOverlay'), rulesOverlay:$('#rulesOverlay'), resetOverlay:$('#resetOverlay'),
+  version:$('#version'),
 };
 
 /* ========== 保存（設定・記録） ========== */
@@ -524,6 +526,15 @@ $('#toTitleBtn').addEventListener('click', () => { clearTimers(); S = null; show
 $('#backBtn').addEventListener('click', pause);
 $('#resumeBtn').addEventListener('click', resume);
 $('#quitBtn').addEventListener('click', quit);
+$('#resetBtn').addEventListener('click', () => el.resetOverlay.classList.add('show'));
+$('#resetNoBtn').addEventListener('click', () => el.resetOverlay.classList.remove('show'));
+$('#resetYesBtn').addEventListener('click', () => {
+  store.recs = {};
+  saveStore();
+  updateRecords();
+  el.resetOverlay.classList.remove('show');
+});
+
 $('#rulesBtn').addEventListener('click', () => el.rulesOverlay.classList.add('show'));
 $('#helpBtn').addEventListener('click', () => { pause(); el.rulesOverlay.classList.add('show'); });
 $('#closeRulesBtn').addEventListener('click', () => el.rulesOverlay.classList.remove('show'));
@@ -544,6 +555,7 @@ markSel('color', myColor);
 markSel('hint', hintOn ? 'on' : 'off');
 markSel('sound', soundOn ? 'on' : 'off');
 updateRecords();
+el.version.textContent = APP_VERSION;
 
 if ('serviceWorker' in navigator)
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
