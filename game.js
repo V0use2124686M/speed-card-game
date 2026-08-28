@@ -12,7 +12,7 @@ const DIFF = {
 };
 
 const STUCK_WAIT = 5000;   // 出せる札がなくなってから場に出すまでの溜め
-const APP_VERSION = 'v1.3 (2026-08-26)';   // 画面に出す版。中身を変えたら上げる
+const APP_VERSION = 'v1.4 (2026-08-26)';   // 画面に出す版。中身を変えたら上げる
 
 const $ = sel => document.querySelector(sel);
 const el = {
@@ -134,7 +134,6 @@ function startGame(){
     startAt: performance.now(),
     frozenAt: 0,               // 「せーの！」の間は時間を止める
     lastTop: [null, null],
-    recycles: 0,
   };
   el.hudDiff.textContent = DIFF[diffKey].label;
   el.hudTime.textContent = '0.0秒';
@@ -162,7 +161,8 @@ function flipCenter(){
   const haveStock = ['me','cpu'].filter(side => S.p[side].stock.length);
 
   if (!haveStock.length){
-    if (!recycle()) return;            // 両方とも山札切れ → 台札を回収して再配分
+    judgeByCount();                    // 二人とも山札切れで出せない → 枚数で決着
+    return;
   } else if (haveStock.length === 1){
     // 片方の山札が尽きているときは、残っている側が左右2枚とも出す
     const side = haveStock[0];
@@ -176,26 +176,10 @@ function flipCenter(){
   render();
 }
 
-/* 両者の山札が尽きて動けないとき: 台札に埋まった札を持ち主へ戻す */
-function recycle(){
-  const buried = [...S.center[0].slice(0,-1), ...S.center[1].slice(0,-1)];
-  // 誰も1枚も出せないまま回収が続くなら、それ以上は進まないので枚数で決着
-  if (!buried.length || ++S.recycles > 3){ judgeByCount(); return false; }
-  S.center[0] = S.center[0].slice(-1);
-  S.center[1] = S.center[1].slice(-1);
-  for (const c of buried) S.p[c.color === myColor ? 'me' : 'cpu'].stock.push(c);
-  shuffle(S.p.me.stock); shuffle(S.p.cpu.stock);
-  autoRefill('me'); autoRefill('cpu');
-  flash('ふだを まぜなおし！');
-  ['me','cpu'].forEach((side, idx) => {
-    if (S.p[side].stock.length) S.center[idx].push(S.p[side].stock.pop());
-  });
-  return true;
-}
-
+/* 二人とも山札が尽きて動けなくなったら、残り枚数の少ない方の勝ち */
 function judgeByCount(){
   const me = remaining('me'), cpu = remaining('cpu');
-  finish(me < cpu ? 'me' : cpu < me ? 'cpu' : 'draw');
+  finish(me < cpu ? 'me' : cpu < me ? 'cpu' : 'draw', true);
 }
 
 function refill(side){
@@ -231,14 +215,13 @@ function play(side, i, p){
   S.p[side].hand[i] = null;
   S.center[p].push(card);
   autoRefill(side);
-  S.recycles = 0;
   if (side === 'me'){ S.selected = null; SFX.play(); } else { SFX.cpu(); }
   render();
   if (remaining(side) === 0) finish(side);
   return true;
 }
 
-function finish(winner){
+function finish(winner, byCount){
   if (!S || !S.running) return;
   S.running = false;
   const sec = +((performance.now() - S.startAt) / 1000).toFixed(1);
@@ -263,10 +246,18 @@ function finish(winner){
   const win = winner === 'me';
   el.resultTitle.textContent = winner === 'draw' ? '引き分け' : win ? '勝ち！' : '負け…';
   el.resultTitle.style.color = winner === 'draw' ? '#cfd8dc' : win ? '#f2c14e' : '#ef9a9a';
-  el.resultText.innerHTML = winner === 'draw'
-    ? `決着 つかず。<br>${sec}秒`
-    : `${DIFF[diffKey].label}　${sec}秒<br>` +
-      (win ? `相手の のこり ${left}まい` : `あなたの のこり ${remaining('me')}まい`);
+  if (byCount){
+    // 手詰まりで終わったときは、なぜ終わったのかを出す
+    el.resultText.innerHTML =
+      `二人とも 出せなく なりました。<br>` +
+      (winner === 'draw' ? 'おなじ まい数で 引き分け。<br>' : 'のこりが 少ない ほうの 勝ち！<br>') +
+      `あなた ${remaining('me')}まい ／ 相手 ${left}まい　（${sec}秒）`;
+  } else {
+    el.resultText.innerHTML = winner === 'draw'
+      ? `決着 つかず。<br>${sec}秒`
+      : `${DIFF[diffKey].label}　${sec}秒<br>` +
+        (win ? `相手の のこり ${left}まい` : `あなたの のこり ${remaining('me')}まい`);
+  }
 
   const lines = [];
   if (newBest) lines.push('🎉 いままでで 一番 速い！');
@@ -399,11 +390,6 @@ function checkStuck(){
     scheduleCpu(cpuDelay());
     stuckTimer = setInterval(checkStuck, 220);
   }, 1000);
-}
-
-function flash(msg){
-  el.centerMsg.textContent = msg;
-  setTimeout(() => { if (el.centerMsg.textContent === msg) el.centerMsg.textContent = ''; }, 900);
 }
 
 /* ========== 描画 ========== */
