@@ -12,7 +12,7 @@ const DIFF = {
 };
 
 const STUCK_WAIT = 5000;   // 出せる札がなくなってから場に出すまでの溜め
-const APP_VERSION = 'v1.2 (2026-08-26)';   // 画面に出す版。中身を変えたら上げる
+const APP_VERSION = 'v1.3 (2026-08-26)';   // 画面に出す版。中身を変えたら上げる
 
 const $ = sel => document.querySelector(sel);
 const el = {
@@ -159,12 +159,18 @@ function startLoops(){
 }
 
 function flipCenter(){
-  let flipped = 0;
-  ['me','cpu'].forEach((side, idx) => {
-    const p = S.p[side];
-    if (p.stock.length){ S.center[idx].push(p.stock.pop()); flipped++; }
-  });
-  if (!flipped && !recycle()) return;   // 山札が尽きていたら台札を回収して再配分
+  const haveStock = ['me','cpu'].filter(side => S.p[side].stock.length);
+
+  if (!haveStock.length){
+    if (!recycle()) return;            // 両方とも山札切れ → 台札を回収して再配分
+  } else if (haveStock.length === 1){
+    // 片方の山札が尽きているときは、残っている側が左右2枚とも出す
+    const side = haveStock[0];
+    for (let p = 0; p < 2 && S.p[side].stock.length; p++) S.center[p].push(S.p[side].stock.pop());
+  } else {
+    ['me','cpu'].forEach((side, idx) => S.center[idx].push(S.p[side].stock.pop()));
+  }
+
   autoRefill('me'); autoRefill('cpu');
   SFX.flip();
   render();
