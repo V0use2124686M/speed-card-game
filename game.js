@@ -12,7 +12,7 @@ const DIFF = {
 };
 
 const STUCK_WAIT = 5000;   // 出せる札がなくなってから場に出すまでの溜め
-const APP_VERSION = 'v1.4 (2026-08-26)';   // 画面に出す版。中身を変えたら上げる
+const APP_VERSION = 'v1.5 (2026-09-23)';   // 画面に出す版。中身を変えたら上げる
 
 const $ = sel => document.querySelector(sel);
 const el = {
@@ -158,25 +158,19 @@ function startLoops(){
 }
 
 function flipCenter(){
-  const haveStock = ['me','cpu'].filter(side => S.p[side].stock.length);
-
-  if (!haveStock.length){
-    judgeByCount();                    // 二人とも山札切れで出せない → 枚数で決着
+  // どちらかの山札が尽きていたら、続けても勝負にならないので枚数で決着
+  if (S.p.me.stock.length === 0 || S.p.cpu.stock.length === 0){
+    judgeByCount();
     return;
-  } else if (haveStock.length === 1){
-    // 片方の山札が尽きているときは、残っている側が左右2枚とも出す
-    const side = haveStock[0];
-    for (let p = 0; p < 2 && S.p[side].stock.length; p++) S.center[p].push(S.p[side].stock.pop());
-  } else {
-    ['me','cpu'].forEach((side, idx) => S.center[idx].push(S.p[side].stock.pop()));
   }
+  ['me','cpu'].forEach((side, idx) => S.center[idx].push(S.p[side].stock.pop()));
 
   autoRefill('me'); autoRefill('cpu');
   SFX.flip();
   render();
 }
 
-/* 二人とも山札が尽きて動けなくなったら、残り枚数の少ない方の勝ち */
+/* 手詰まりになったら、残り枚数の少ない方の勝ち */
 function judgeByCount(){
   const me = remaining('me'), cpu = remaining('cpu');
   finish(me < cpu ? 'me' : cpu < me ? 'cpu' : 'draw', true);
