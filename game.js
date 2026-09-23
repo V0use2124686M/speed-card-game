@@ -12,7 +12,7 @@ const DIFF = {
 };
 
 const STUCK_WAIT = 5000;   // 出せる札がなくなってから場に出すまでの溜め
-const APP_VERSION = 'v1.5 (2026-09-23)';   // 画面に出す版。中身を変えたら上げる
+const APP_VERSION = 'v1.6 (2026-09-23)';   // 画面に出す版。中身を変えたら上げる
 
 const $ = sel => document.querySelector(sel);
 const el = {
@@ -158,22 +158,26 @@ function startLoops(){
 }
 
 function flipCenter(){
-  // どちらかの山札が尽きていたら、続けても勝負にならないので枚数で決着
-  if (S.p.me.stock.length === 0 || S.p.cpu.stock.length === 0){
-    judgeByCount();
-    return;
-  }
-  ['me','cpu'].forEach((side, idx) => S.center[idx].push(S.p[side].stock.pop()));
+  ['me','cpu'].forEach((side, idx) => {
+    const p = S.p[side];
+    if (p.stock.length){ S.center[idx].push(p.stock.pop()); return; }
+    // 山札がないときは、手ふだから1まい出す（任天堂の遊び方と同じ）。
+    // 自分は えらんでいる札、えらんでいなければ一番左
+    const sel = side === 'me' ? S.selected : null;
+    const i = sel !== null && p.hand[sel] ? sel : p.hand.findIndex(Boolean);
+    if (i < 0) return;
+    S.center[idx].push(p.hand[i]);
+    p.hand[i] = null;
+    if (side === 'me') S.selected = null;
+  });
 
   autoRefill('me'); autoRefill('cpu');
   SFX.flip();
   render();
-}
 
-/* 手詰まりになったら、残り枚数の少ない方の勝ち */
-function judgeByCount(){
-  const me = remaining('me'), cpu = remaining('cpu');
-  finish(me < cpu ? 'me' : cpu < me ? 'cpu' : 'draw', true);
+  // 手ふだから出して なくなったら勝ち（同時なら引き分け）
+  const meOut = remaining('me') === 0, cpuOut = remaining('cpu') === 0;
+  if (meOut || cpuOut) finish(meOut && cpuOut ? 'draw' : meOut ? 'me' : 'cpu');
 }
 
 function refill(side){
@@ -215,7 +219,7 @@ function play(side, i, p){
   return true;
 }
 
-function finish(winner, byCount){
+function finish(winner){
   if (!S || !S.running) return;
   S.running = false;
   const sec = +((performance.now() - S.startAt) / 1000).toFixed(1);
@@ -240,18 +244,10 @@ function finish(winner, byCount){
   const win = winner === 'me';
   el.resultTitle.textContent = winner === 'draw' ? '引き分け' : win ? '勝ち！' : '負け…';
   el.resultTitle.style.color = winner === 'draw' ? '#cfd8dc' : win ? '#f2c14e' : '#ef9a9a';
-  if (byCount){
-    // 手詰まりで終わったときは、なぜ終わったのかを出す
-    el.resultText.innerHTML =
-      `二人とも 出せなく なりました。<br>` +
-      (winner === 'draw' ? 'おなじ まい数で 引き分け。<br>' : 'のこりが 少ない ほうの 勝ち！<br>') +
-      `あなた ${remaining('me')}まい ／ 相手 ${left}まい　（${sec}秒）`;
-  } else {
-    el.resultText.innerHTML = winner === 'draw'
-      ? `決着 つかず。<br>${sec}秒`
-      : `${DIFF[diffKey].label}　${sec}秒<br>` +
-        (win ? `相手の のこり ${left}まい` : `あなたの のこり ${remaining('me')}まい`);
-  }
+  el.resultText.innerHTML = winner === 'draw'
+    ? `二人 同時に 出しきりました。<br>${sec}秒`
+    : `${DIFF[diffKey].label}　${sec}秒<br>` +
+      (win ? `相手の のこり ${left}まい` : `あなたの のこり ${remaining('me')}まい`);
 
   const lines = [];
   if (newBest) lines.push('🎉 いままでで 一番 速い！');
